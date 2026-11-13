@@ -1,0 +1,17 @@
+# Fichiers générés (annexe A du tutoriel)
+*.o
+*.a
+*.so
+*.d
+*.exe
+*.out
+build/
+
+# CMake / éditeurs
+cmake-build-*/
+.idea/
+.vscode/
+
+# Fichiers système (macOS, Windows)
+.DS_Store
+Thumbs.db
