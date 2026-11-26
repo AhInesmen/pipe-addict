@@ -38,6 +38,22 @@ typedef struct Grille
     Case cases[TAILLE][TAILLE];
 } Grille;
 
+// Etat de la partie
+typedef enum
+{
+    EN_COURS,
+    VICTOIRE,
+    DEFAITE
+} EtatPartie;
+
+// Position du fluide : la case où il se trouve et le côté par où il va sortir
+typedef struct Fluide
+{
+    int ligne;
+    int colonne;
+    Direction sortie;
+} Fluide;
+
 typedef struct Partie
 {
     Grille grille;
@@ -45,6 +61,8 @@ typedef struct Partie
     int ligneEntree;
     int ligneSortie;
     int niveau;
+    Fluide fluide;
+    EtatPartie etat;
 } Partie;
 
 #endif

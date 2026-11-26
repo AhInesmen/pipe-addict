@@ -1,72 +1,48 @@
 #include <stdio.h>
-#include "types.h"
 #include <stdlib.h>
 #include <time.h>
-/* Remplit la grille au hasard : tuyaux, entrée, sortie, case swap,
-   puis les malus selon le niveau. Toutes les cases sont cachées. */
-void remplirAuHasard(Partie *partie)
-{
-    /* 1. Un tuyau au hasard dans chaque case (les 6 tuyaux sont les valeurs 0 à 5) */
-    for (int i = 0; i < TAILLE; i++)
-    {
-        for (int j = 0; j < TAILLE; j++)
-        {
-            partie->grille.cases[i][j].contenu = rand() % 6;
-            partie->grille.cases[i][j].revelee = false;
-            partie->grille.cases[i][j].remplie = false;
-        }
-    }
-
-    /* On place l'entrée, la sortie et la case swap aléatoirement*/
-    partie->ligneEntree = rand() % TAILLE;
-    partie->ligneSortie = rand() % TAILLE;
-    partie->swap = rand() % 6;
-
-    /* On place les malus aléatoirement */
-    int nbMalus = 2 * partie->niveau;
-    int places = 0;
-    while (places < nbMalus) // tant que tous les malus ne sont pas placés
-    {
-        int i = rand() % TAILLE; // choix des coordonées aléatoire
-        int j = rand() % TAILLE;
-        Case *c = &partie->grille.cases[i][j];
-
-        bool dejaMalus = (c->contenu == BOMBE || c->contenu == DECHARGE);
-        bool caseEntree = (i == partie->ligneEntree && j == 0);
-        bool caseSortie = (i == partie->ligneSortie && j == TAILLE - 1);
-
-        if (!dejaMalus && !caseEntree && !caseSortie)
-        {
-            if (places % 2 == 0)
-                c->contenu = DECHARGE; // décharge est de type pair
-            else
-                c->contenu = BOMBE;
-            places++;
-        }
-    }
-}
+#include "types.h"
+#include "grille.h"
+#include "fluide.h"
 
 void afficherGrille(const Partie *partie)
 {
     const char lettres[] = "1234HVBD"; // premieres lettres des types de contenu des cases
-
+    printf("     1 2 3 4 5 6\n");      // numéros de colonne
     for (int i = 0; i < TAILLE; i++)
     {
+        printf("%d ", i + 1);         // numéro de ligne
         if (i == partie->ligneEntree) // caseEntree
-            printf("> ");
+            printf("E> ");
         else
-            printf("  ");
+            printf("   ");
 
         for (int j = 0; j < TAILLE; j++)
         {
-            printf("%c ", lettres[partie->grille.cases[i][j].contenu]);
+            if (partie->grille.cases[i][j].revelee == false)
+            {
+                printf("? ");
+            }
+            else
+            {
+                printf("%c ", lettres[partie->grille.cases[i][j].contenu]);
+            }
         }
 
         if (i == partie->ligneSortie) // caseSortie
-            printf("<");
+            printf(">S");
         printf("\n");
     }
     printf("Case swap : %c\n", lettres[partie->swap]);
+}
+
+/* Attend que le joueur appuie sur Entrée : lit les caractères un par un
+   jusqu'au retour à la ligne (ou la fin du fichier). */
+void attendreEntree(void)
+{
+    int caractere;
+    while ((caractere = getchar()) != '\n' && caractere != EOF)
+        ;
 }
 
 int main(void)
@@ -76,6 +52,44 @@ int main(void)
     Partie partie;
     partie.niveau = 2;
     remplirAuHasard(&partie);
-    afficherGrille(&partie);
+
+    /* Phase 1 : le joueur révèle et échange des cases */
+    int ligne, colonne;
+    while (true)
+    {
+        afficherGrille(&partie);
+        printf("Ligne et colonne (1 a 6), ou 0 0 pour lancer le fluide : ");
+        if (scanf("%d %d", &ligne, &colonne) != 2 || ligne == 0)
+            break;
+
+        ligne--; // le joueur tape de 1 à 6, le tableau va de 0 à 5
+        colonne--;
+
+        if (!estDansGrille(ligne, colonne))
+        {
+            printf("Cette case n'est pas dans la grille.\n");
+            continue;
+        }
+
+        if (partie.grille.cases[ligne][colonne].revelee == false)
+            revelerCase(&partie, ligne, colonne);
+        else if (!swapperCase(&partie, ligne, colonne))
+            printf("Echange impossible : c'est un malus.\n");
+    }
+    /* Phase 2 : le fluide coule, une case à chaque appui sur Entrée */
+    initialiserFluide(&partie);
+    attendreEntree(); // vide le reste de la ligne tapée au scanf (la touche Entrée)
+    printf("Le fluide part ! Appuie sur Entree pour le faire avancer.\n");
+    while (partie.etat == EN_COURS)
+    {
+        attendreEntree();
+        passerCaseSuivante(&partie);
+        afficherGrille(&partie);
+    }
+
+    if (partie.etat == VICTOIRE)
+        printf("Victoire ! Le fluide a atteint la sortie.\n");
+    else
+        printf("Defaite : le fluide est bloque.\n");
     return 0;
 }
