@@ -4,9 +4,9 @@
 #include "types.h"
 
 #define FENETRE_LARGEUR 800 // taille de la fenêtre, en pixels
-#define FENETRE_HAUTEUR 600
-#define TAILLE_CASE 80 // côté d'une case, en pixels
-#define GRILLE_X 160   // coin en haut à gauche de la grille : (800 - 6 x 80) / 2 = 160
+#define FENETRE_HAUTEUR 660 // 600 + une bande sous la grille pour le message de fin
+#define TAILLE_CASE 80      // côté d'une case, en pixels
+#define GRILLE_X 160        // coin en haut à gauche de la grille : (800 - 6 x 80) / 2 = 160
 #define GRILLE_Y 60
 #define SWAP_X 680 // la case swap, à droite de la grille
 #define SWAP_Y 60

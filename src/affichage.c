@@ -19,6 +19,7 @@
 #include <allegro5/allegro_ttf.h>
 #include "affichage.h"
 #include "tuyau.h"
+#include "grille.h" // estDansGrille
 #include "fluide.h" // DELAI_DEPART, DELAI_CASE, PAUSE_BOMBE (pour l'écran des règles)
 #include "jeu.h"    // TEMPS_LIMITE
 
@@ -138,6 +139,44 @@ static float remplissageCase(const Partie *partie, int i, int j)
     return r;
 }
 
+/* La case où le fluide aurait dû entrer ensuite : en cas de défaite, c'est elle qui l'a bloqué.
+   Les deux résultats sont rendus par pointeurs. */
+static void caseSuivante(const Partie *partie, int *ligne, int *colonne)
+{
+    *ligne = partie->fluide.ligne + decalageLigne(partie->fluide.sortie);
+    *colonne = partie->fluide.colonne + decalageColonne(partie->fluide.sortie);
+}
+
+/* Défaite (hors temps écoulé) : on montre en rouge ce qui a bloqué le fluide,
+   la case suivante si elle est dans la grille, sinon le bord de la grille qu'il a touché. */
+static void dessinerBlocage(const Partie *partie)
+{
+    if (partie->etat != DEFAITE || partie->tempsRestant <= 0)
+        return;
+
+    ALLEGRO_COLOR rouge = al_map_rgb(230, 60, 60);
+    int ligne, colonne;
+    caseSuivante(partie, &ligne, &colonne);
+
+    if (estDansGrille(ligne, colonne)) // la case suivante bloque : on l'encadre
+    {
+        float x = GRILLE_X + colonne * TAILLE_CASE;
+        float y = GRILLE_Y + ligne * TAILLE_CASE;
+        al_draw_rectangle(x + 4, y + 4, x + TAILLE_CASE - 4, y + TAILLE_CASE - 4, rouge, 6);
+    }
+    else // le fluide sort par le bord : un trait rouge sur ce côté de sa dernière case
+    {
+        float x = GRILLE_X + partie->fluide.colonne * TAILLE_CASE;
+        float y = GRILLE_Y + partie->fluide.ligne * TAILLE_CASE;
+        Direction d = partie->fluide.sortie;
+        float x1 = (d == DROITE) ? x + TAILLE_CASE : x;
+        float y1 = (d == BAS) ? y + TAILLE_CASE : y;
+        float x2 = (d == GAUCHE) ? x : x + TAILLE_CASE;
+        float y2 = (d == HAUT) ? y : y + TAILLE_CASE;
+        al_draw_line(x1, y1, x2, y2, rouge, 10);
+    }
+}
+
 /* Les 36 cases, l'entrée et la sortie. */
 static void dessinerGrille(const Partie *partie, bool voirTout)
 {
@@ -182,6 +221,8 @@ static void dessinerGrille(const Partie *partie, bool voirTout)
     float xDroite = GRILLE_X + TAILLE * TAILLE_CASE;
     float ySortie = GRILLE_Y + partie->ligneSortie * TAILLE_CASE;
     al_draw_filled_rectangle(xDroite, ySortie + 25, xDroite + 30, ySortie + 55, repere);
+
+    dessinerBlocage(partie);
 }
 
 /* La case swap, encadrée en orange, avec son titre au-dessus. */
@@ -241,7 +282,7 @@ static void dessinerTextes(const Partie *partie, bool pause)
         }
     }
 
-    al_draw_text(police, al_map_rgb(150, 150, 165), FENETRE_LARGEUR / 2, 560, ALLEGRO_ALIGN_CENTRE,
+    al_draw_text(police, al_map_rgb(150, 150, 165), FENETRE_LARGEUR / 2, FENETRE_HAUTEUR - 36, ALLEGRO_ALIGN_CENTRE,
                  "Clic : révéler, puis échanger   |   Espace : tout voir   |   P : pause");
 }
 
@@ -284,16 +325,12 @@ static void dessinerColonneGauche(const Partie *partie)
     dessinerBouton(BOUTON_REGLES, "Règles", true);
 }
 
-/* Le message de fin, dans un bandeau sombre par-dessus la grille. */
+/* Le message de fin, dans une bande SOUS la grille : toute la grille reste visible,
+   avec en rouge ce qui a bloqué le fluide. */
 static void dessinerMessageFin(const Partie *partie)
 {
     if (partie->etat == EN_COURS)
         return;
-
-    float haut = GRILLE_Y + 2 * TAILLE_CASE + 10;
-    float bas = GRILLE_Y + 4 * TAILLE_CASE - 10;
-    al_draw_filled_rectangle(GRILLE_X - 20, haut, GRILLE_X + TAILLE * TAILLE_CASE + 20, bas,
-                             al_map_rgba(20, 20, 30, 230)); // presque opaque
 
     const char *titre;
     const char *raison;
@@ -307,18 +344,31 @@ static void dessinerMessageFin(const Partie *partie)
     else
     {
         titre = "Perdu...";
+        couleur = al_map_rgb(240, 90, 90);
+        int ligne, colonne;
+        caseSuivante(partie, &ligne, &colonne);
         if (partie->tempsRestant <= 0)
             raison = "Le temps est écoulé.";
+        else if (!estDansGrille(ligne, colonne))
+            raison = "Le fluide est sorti par le bord.";
+        else if (partie->grille.cases[ligne][colonne].remplie)
+            raison = "Le fluide est repassé par une case remplie.";
         else
-            raison = "Le fluide est tombé dans un cul-de-sac.";
-        couleur = al_map_rgb(240, 90, 90);
+            raison = "Cul-de-sac : voir la case en rouge.";
     }
 
-    float centreX = GRILLE_X + TAILLE * TAILLE_CASE / 2;
-    al_draw_text(policeGrande, couleur, centreX, haut + 20, ALLEGRO_ALIGN_CENTRE, titre);
-    al_draw_text(police, al_map_rgb(230, 230, 240), centreX, haut + 76, ALLEGRO_ALIGN_CENTRE, raison);
-    al_draw_text(police, al_map_rgb(150, 150, 165), centreX, haut + 102, ALLEGRO_ALIGN_CENTRE,
-                 "Clique sur Nouveau ou Refaire pour rejouer, ou sur Règles");
+    /* La bande : de la gauche de la grille jusqu'au bord droit de la fenêtre */
+    float haut = GRILLE_Y + TAILLE * TAILLE_CASE + 8;
+    al_draw_filled_rounded_rectangle(GRILLE_X - 10, haut, FENETRE_LARGEUR - 30, haut + 64, 10, 10,
+                                     al_map_rgb(45, 45, 60));
+    al_draw_rounded_rectangle(GRILLE_X - 10, haut, FENETRE_LARGEUR - 30, haut + 64, 10, 10, couleur, 2);
+
+    /* Le titre en grand à gauche, puis la raison et la consigne à sa droite */
+    al_draw_text(policeGrande, couleur, GRILLE_X + 10, haut + 8, ALLEGRO_ALIGN_LEFT, titre);
+    float xTexte = GRILLE_X + 10 + al_get_text_width(policeGrande, titre) + 24;
+    al_draw_text(police, al_map_rgb(230, 230, 240), xTexte, haut + 10, ALLEGRO_ALIGN_LEFT, raison);
+    al_draw_text(police, al_map_rgb(150, 150, 165), xTexte, haut + 36, ALLEGRO_ALIGN_LEFT,
+                 "Nouveau ou Refaire pour rejouer");
 }
 
 void dessinerJeu(const Partie *partie, bool voirTout, bool pause)
@@ -428,7 +478,7 @@ void dessinerAccueil(const char *nom, int niveau)
     dessinerBoutonCentre(JOUER_Y, "Jouer", nom[0] != '\0');
     dessinerBoutonCentre(REGLES_Y, "Comment jouer", true);
 
-    al_draw_text(police, grisClair, centreX, 568, ALLEGRO_ALIGN_CENTRE,
+    al_draw_text(police, grisClair, centreX, FENETRE_HAUTEUR - 40, ALLEGRO_ALIGN_CENTRE,
                  "Écris ton pseudo, choisis un niveau, puis clique sur Jouer ou appuie sur Entrée");
 }
 
