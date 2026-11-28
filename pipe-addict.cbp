@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="pipe-addict" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/pipe-addict" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option working_dir="." />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/pipe-addict" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option working_dir="." />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-Wextra" />
+			<Add option="-std=c11" />
+		</Compiler>
+		<Linker>
+			<Add library="allegro_ttf" />
+			<Add library="allegro_font" />
+			<Add library="allegro_primitives" />
+			<Add library="allegro_main" />
+			<Add library="allegro" />
+		</Linker>
+		<Unit filename="src/affichage.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/affichage.h" />
+		<Unit filename="src/fluide.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/fluide.h" />
+		<Unit filename="src/grille.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/grille.h" />
+		<Unit filename="src/jeu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/jeu.h" />
+		<Unit filename="src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tuyau.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/tuyau.h" />
+		<Unit filename="src/types.h" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>
