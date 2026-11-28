@@ -51,6 +51,16 @@ static int secondesAffichees(float temps)
     return (int)(temps + 0.99f);
 }
 
+/* Le nom d'un niveau (1, 2 ou 3), le même à l'accueil et pendant la partie. */
+static const char *nomNiveau(int niveau)
+{
+    if (niveau == 1)
+        return "Facile";
+    if (niveau == 3)
+        return "Difficile";
+    return "Moyen";
+}
+
 /* Le haut de chaque bouton, en pixels : un bouton tous les 60 pixels. */
 static float boutonY(Bouton bouton)
 {
@@ -311,8 +321,7 @@ static void dessinerColonneGauche(const Partie *partie)
     char texte[64];
 
     al_draw_text(police, al_map_rgb(230, 140, 50), BOUTON_X, 70, ALLEGRO_ALIGN_LEFT, partie->joueur);
-    snprintf(texte, sizeof texte, "Niveau %d", partie->niveau);
-    al_draw_text(police, blanc, BOUTON_X, 94, ALLEGRO_ALIGN_LEFT, texte);
+    al_draw_text(police, blanc, BOUTON_X, 94, ALLEGRO_ALIGN_LEFT, nomNiveau(partie->niveau));
     snprintf(texte, sizeof texte, "Partie n° %d", partie->numeroPartie);
     al_draw_text(police, blanc, BOUTON_X, 118, ALLEGRO_ALIGN_LEFT, texte);
     snprintf(texte, sizeof texte, "Gagnées : %d", partie->victoires);
@@ -461,7 +470,6 @@ void dessinerAccueil(const char *nom, int niveau)
 
     /* Les trois niveaux : le niveau choisi est en orange */
     al_draw_text(police, blanc, centreX, 318, ALLEGRO_ALIGN_CENTRE, "Niveau :");
-    const char *noms[3] = {"Facile", "Moyen", "Difficile"};
     for (int n = 1; n <= 3; n++)
     {
         float x = niveauX(n);
@@ -469,7 +477,7 @@ void dessinerAccueil(const char *nom, int niveau)
         al_draw_filled_rounded_rectangle(x, NIVEAU_Y, x + NIVEAU_LARGEUR, NIVEAU_Y + BOUTON_HAUTEUR, 8, 8,
                                          choisi ? orange : al_map_rgb(60, 60, 80));
         al_draw_text(police, choisi ? al_map_rgb(30, 30, 40) : blanc, x + NIVEAU_LARGEUR / 2, NIVEAU_Y + 10,
-                     ALLEGRO_ALIGN_CENTRE, noms[n - 1]);
+                     ALLEGRO_ALIGN_CENTRE, nomNiveau(n));
     }
     snprintf(texte, sizeof texte, "%d malus sur la grille", 2 * niveau);
     al_draw_text(police, grisClair, centreX, NIVEAU_Y + 50, ALLEGRO_ALIGN_CENTRE, texte);

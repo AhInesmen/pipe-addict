@@ -198,9 +198,9 @@ int main(void)
             else if (bouton == BOUTON_REGLES) // revoir les règles, pendant ou après une partie
                 regles = true;
 
-            /* Clic dans la grille, seulement pendant la partie.
+            /* Clic dans la grille, seulement pendant la partie et hors pause (sinon on pourrait tricher).
                Clic à gauche ou au-dessus de la grille : on l'ignore (sinon la division donnerait 0 à tort) */
-            else if (partie.etat == EN_COURS && x >= GRILLE_X && y >= GRILLE_Y)
+            else if (partie.etat == EN_COURS && !pause && x >= GRILLE_X && y >= GRILLE_Y)
             {
                 /* Le calcul inverse : du pixel à la case */
                 int ligne = (y - GRILLE_Y) / TAILLE_CASE;
