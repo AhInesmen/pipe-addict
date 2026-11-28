@@ -1,4 +1,15 @@
 /*
+ * Pipe-Addict : le bon tuyau - Projet C ING3, ECE Paris 2026-2027, groupe DU01
+ * Fichier test_fluide.c : tests de l'écoulement du fluide sur des grilles écrites à la main
+ *
+ * Utilisation de l'IA (Claude, Anthropic) dans ce fichier : environ 100 %
+ * Tests écrits par Claude, lancés et vérifiés par l'équipe.
+ * Exemples de prompts :
+ *  - « guide moi pour l'étape 6 » (tests proposés pour vérifier passerCaseSuivante)
+ * Vérification : code relu, compilé et testé par l'équipe (tests en console et parties jouées).
+ */
+
+/*
  * Tests du fluide, en console, sans main.c ni Allegro.
  * On écrit une grille à la main, on fait couler le fluide et on vérifie le résultat.
  *

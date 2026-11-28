@@ -1,3 +1,14 @@
+/*
+ * Pipe-Addict : le bon tuyau - Projet C ING3, ECE Paris 2026-2027, groupe DU01
+ * Fichier jeu_console.c : première version du jeu, jouable dans le terminal
+ *
+ * Utilisation de l'IA (Claude, Anthropic) dans ce fichier : environ 60 %
+ * Affichage de la grille écrit par l'équipe avec corrections ; phase 2 (le fluide) fournie par Claude.
+ * Exemples de prompts :
+ *  - « envoie moi le main » (phase 2 : faire couler le fluide)
+ * Vérification : code relu, compilé et testé par l'équipe (tests en console et parties jouées).
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -8,28 +19,27 @@
 void afficherGrille(const Partie *partie)
 {
     const char lettres[] = "1234HVBD"; // premieres lettres des types de contenu des cases
-    printf("     1 2 3 4 5 6\n");      // numéros de colonne
+
+    printf("     1 2 3 4 5 6\n"); // numéros de colonne
     for (int i = 0; i < TAILLE; i++)
     {
         printf("%d ", i + 1);         // numéro de ligne
-        if (i == partie->ligneEntree) // caseEntree
+        if (i == partie->ligneEntree) // case d'entrée
             printf("E> ");
         else
             printf("   ");
 
         for (int j = 0; j < TAILLE; j++)
         {
-            if (partie->grille.cases[i][j].revelee == false)
-            {
+            if (partie->grille.cases[i][j].remplie)
+                printf("~ ");
+            else if (partie->grille.cases[i][j].revelee == false)
                 printf("? ");
-            }
             else
-            {
                 printf("%c ", lettres[partie->grille.cases[i][j].contenu]);
-            }
         }
 
-        if (i == partie->ligneSortie) // caseSortie
+        if (i == partie->ligneSortie) // case de sortie
             printf(">S");
         printf("\n");
     }
@@ -76,6 +86,7 @@ int main(void)
         else if (!swapperCase(&partie, ligne, colonne))
             printf("Echange impossible : c'est un malus.\n");
     }
+
     /* Phase 2 : le fluide coule, une case à chaque appui sur Entrée */
     initialiserFluide(&partie);
     attendreEntree(); // vide le reste de la ligne tapée au scanf (la touche Entrée)
