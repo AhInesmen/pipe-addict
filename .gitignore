@@ -1,17 +1,30 @@
-# Fichiers générés (annexe A du tutoriel)
+# Fichiers générés à la compilation
 *.o
 *.a
 *.so
 *.d
 *.exe
+*.dll
 *.out
-build/
 
-# CMake / éditeurs
-cmake-build-*/
+# Exécutables du jeu et des tests
+/pipe-addict
+/test_fluide
+/test_tuyau
+/jeu_console
+/essai_fenetre
+
+# Dossiers de compilation (CMake, CodeBlocks) et version Windows
+/build/
+/cmake-build-*/
+/bin/
+/obj/
+/Pipe-Addict-Windows/
+*.layout
+*.depend
+
+# Éditeurs et système
 .idea/
 .vscode/
-
-# Fichiers système (macOS, Windows)
 .DS_Store
 Thumbs.db

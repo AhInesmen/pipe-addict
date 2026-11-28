@@ -1,3 +1,12 @@
+/*
+ * Pipe-Addict : le bon tuyau - Projet C ING3, ECE Paris 2026-2027, groupe DU01
+ * Fichier essai_fenetre.c : premier essai Allegro (fenêtre, carré, clics), pour apprendre
+ *
+ * Utilisation de l'IA (Claude, Anthropic) dans ce fichier : environ 100 %
+ * Exemple de prompt :
+ *  - « passons à la prochaine étape » (ouvrir une fenêtre graphique avec Allegro)
+ * Vérification : compilé et lancé par l'équipe.
+ */
 #include <stdio.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
@@ -32,10 +41,10 @@ int main(void)
     bool continuer = true;
     while (continuer)
     {
-        al_clear_to_color(al_map_rgb(30, 30, 40));                                 // fond gris foncé
-        al_draw_filled_rectangle(100, 100, 200, 200, al_map_rgb(230, 140, 50));     // carré orange
-        al_draw_rectangle(100, 100, 200, 200, al_map_rgb(255, 255, 255), 3);        // son contour blanc
-        al_flip_display();                                                          // montrer le dessin
+        al_clear_to_color(al_map_rgb(30, 30, 40));                              // fond gris foncé
+        al_draw_filled_rectangle(100, 100, 200, 200, al_map_rgb(230, 140, 50)); // carré orange
+        al_draw_rectangle(100, 100, 200, 200, al_map_rgb(255, 255, 255), 3);    // son contour blanc
+        al_flip_display();                                                      // montrer le dessin
 
         ALLEGRO_EVENT evenement;
         al_wait_for_event(file, &evenement); // le programme dort jusqu'au prochain événement

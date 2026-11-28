@@ -1,3 +1,12 @@
+/*
+ * Pipe-Addict : le bon tuyau - Projet C ING3, ECE Paris 2026-2027, groupe DU01
+ * Fichier test_tuyau.c : tests de la table des connexions (tuyaux et malus)
+ *
+ * Utilisation de l'IA (Claude, Anthropic) dans ce fichier : environ 100 %
+ * Exemple de prompt :
+ *  - « passons à la prochaine étape » (tester la table des connexions)
+ * Vérification : tests lancés par l'équipe, tous réussis.
+ */
 #include <stdio.h>
 #include "types.h"
 #include "tuyau.h"
