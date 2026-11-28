@@ -9,6 +9,7 @@
 
 # Exécutables du jeu et des tests
 /pipe-addict
+/pipe
 /test_fluide
 /test_tuyau
 /jeu_console

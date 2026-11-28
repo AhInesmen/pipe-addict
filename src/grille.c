@@ -12,6 +12,23 @@
 
 #include <stdlib.h>
 #include "grille.h"
+#include "tuyau.h" // lireConnexion, decalageLigne, decalageColonne
+
+/* Donne à la case (ligne, colonne) un tuyau tiré au hasard, ouvert du côté « cote »,
+   et dont l'autre ouverture mène vers une case de la grille (et pas vers l'extérieur).
+   Sert pour la case d'entrée (ouverte à gauche) et la case de sortie (ouverte à droite). */
+static void placerTuyauOuvert(Partie *partie, int ligne, int colonne, Direction cote)
+{
+    Contenu c;
+    Direction autre;
+    do
+    {
+        c = rand() % 6;                 // un des 6 tuyaux
+        autre = lireConnexion(c, cote); // son autre ouverture, ou AUCUNE s'il est fermé de ce côté
+    } while (autre == AUCUNE || !estDansGrille(ligne + decalageLigne(autre), colonne + decalageColonne(autre)));
+
+    partie->grille.cases[ligne][colonne].contenu = c;
+}
 
 /* Remplit la grille au hasard : tuyaux, entrée, sortie, case swap,
    puis les malus selon le niveau. Toutes les cases sont cachées. */
@@ -33,6 +50,11 @@ void remplirAuHasard(Partie *partie)
     partie->ligneEntree = rand() % TAILLE;
     partie->ligneSortie = rand() % TAILLE;
     partie->swap = rand() % 6;
+
+    /* La case d'entrée et la case de sortie reçoivent toujours un tuyau qui s'y raccorde :
+       sans ça, une partie sur deux était perdue dès le départ. Elles restent cachées. */
+    placerTuyauOuvert(partie, partie->ligneEntree, 0, GAUCHE);
+    placerTuyauOuvert(partie, partie->ligneSortie, TAILLE - 1, DROITE);
 
     /* On place les malus aléatoirement */
     int nbMalus = 2 * partie->niveau;
